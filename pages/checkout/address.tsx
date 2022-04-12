@@ -1,5 +1,6 @@
 import { useRouter } from "next/router";
 import Cookies from "js-cookie";
+import { useContext, useEffect } from "react";
 
 import {
   Box,
@@ -13,9 +14,11 @@ import {
   Typography,
 } from "@mui/material";
 import { useForm } from "react-hook-form";
+
 import { ShopLayout } from "../../components/layouts";
 import { countries } from "../../utils";
-import { useContext, useEffect } from "react";
+import { CartContex } from "../../context/cart/CartContext";
+
 
 type FormData = {
   firstName: string;
@@ -215,7 +218,6 @@ const AddressPage = () => {
 // You should use getServerSideProps when:
 // - Only if you need to pre-render a page whose data must be fetched at request time
 // import { GetServerSideProps } from "next";
-import { CartContex } from "../../context/cart/CartContext";
 
 // export const getServerSideProps: GetServerSideProps = async ({ req }) => {
 //   // const { data } = await  // your fetch function here

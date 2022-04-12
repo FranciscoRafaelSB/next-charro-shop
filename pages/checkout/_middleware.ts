@@ -7,16 +7,16 @@ export async function middleware(req: NextRequest | any, ev: NextFetchEvent) {
   console.log({ session });
   if (!session) {
     //Solution 1
-    // const url = req.nextUrl.clone();
-    // url.pathname = "/auth/login";
-    // url.search = `p=${req.page.name}`;
-    // return NextResponse.redirect(url);
+    const url = req.nextUrl.clone();
+    url.pathname = "/auth/login";
+    url.search = `p=${req.page.name}`;
+    return NextResponse.redirect(url);
 
     //solution 2
-    console.log(req.nextUrl.clone());
-    const { origin, pathname } = req.nextUrl.clone();
+    // console.log(req.nextUrl.clone());
+    // const { origin, pathname } = req.nextUrl.clone();
 
-    return NextResponse.redirect(`${origin}/auth/login?p=${pathname}`);
+    // return NextResponse.redirect(`${origin}/auth/login?p=${pathname}`);
 
     // const requestedPage = req.page.name;
     // return NextResponse.redirect(`/auth/login?p=${requestedPage}`);
