@@ -1,0 +1,24 @@
+/* .each-slide>div {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-size: cover;
+    background-position: center;
+} */
+
+
+
+.each-slide>div {
+    /* height: 350px;
+    display: flex;
+    justify-content: center;
+    background-size: cover;
+    background-position: left; */
+    /* height: 650px; */
+    /* aspect-ratio: 1.2 !important; */
+    height: fit-content;
+    aspect-ratio: 1;
+    background-repeat: no-repeat;
+    background-position: center;
+
+}
