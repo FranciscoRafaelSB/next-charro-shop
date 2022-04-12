@@ -34,7 +34,7 @@ export const Navbar = () => {
     if (searchTerm.trim().length === 0) return;
     push(`/search/${searchTerm}`);
     setIsSearchVisible(false);
-    setSearchTerm("");
+    // setSearchTerm("");
   };
 
   return (

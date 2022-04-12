@@ -86,7 +86,7 @@ export const getServerSideProps: GetServerSideProps = async ({ params }) => {
 
   //TODO retornar otros productos
   if (!foundProducts) {
-    products = await dbProducts.getAllProducts();
+    products = await dbProducts.getProductsByTerm("botas");
   }
 
   return {
