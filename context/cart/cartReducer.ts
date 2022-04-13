@@ -1,31 +1,16 @@
 import { CartState } from "./";
 import { ICartProduct, ShippingAddress } from "../../interfaces";
 
-type CarActionType =
+type CartActionType =
   | {
-      type: "[Cart] - Load cart from cookies | storage";
+      type: "[Cart] - LoadCart from cookies | storage";
       payload: ICartProduct[];
     }
-  | {
-      type: "[Cart] - Update products in cart";
-      payload: ICartProduct[];
-    }
-  | {
-      type: "[Cart] -Chance product quantity";
-      payload: ICartProduct;
-    }
-  | {
-      type: "[Cart] - Remove product in cart";
-      payload: ICartProduct;
-    }
-  | {
-      type: "[Cart] - Load Address from cookies";
-      payload: ShippingAddress;
-    }
-  | {
-      type: "[Cart] - Update Address";
-      payload: ShippingAddress;
-    }
+  | { type: "[Cart] - Update products in cart"; payload: ICartProduct[] }
+  | { type: "[Cart] - Change cart quantity"; payload: ICartProduct }
+  | { type: "[Cart] - Remove product in cart"; payload: ICartProduct }
+  | { type: "[Cart] - LoadAddress from Cookies"; payload: ShippingAddress }
+  | { type: "[Cart] - Update Address"; payload: ShippingAddress }
   | {
       type: "[Cart] - Update order summary";
       payload: {
@@ -35,16 +20,14 @@ type CarActionType =
         total: number;
       };
     }
-  | {
-      type: "[Cart] - Order completed";
-    };
+  | { type: "[Cart] - Order complete" };
 
 export const cartReducer = (
   state: CartState,
-  action: CarActionType
+  action: CartActionType
 ): CartState => {
   switch (action.type) {
-    case "[Cart] - Load cart from cookies | storage":
+    case "[Cart] - LoadCart from cookies | storage":
       return {
         ...state,
         isLoaded: true,
@@ -54,21 +37,16 @@ export const cartReducer = (
     case "[Cart] - Update products in cart":
       return {
         ...state,
-        //Solucion 1
-        // cart: [...state.cart, action.payload],
-
-        // Solucion 2
         cart: [...action.payload],
       };
-    case "[Cart] -Chance product quantity":
+
+    case "[Cart] - Change cart quantity":
       return {
         ...state,
         cart: state.cart.map((product) => {
           if (product._id !== action.payload._id) return product;
           if (product.size !== action.payload.size) return product;
-
-          // product.quantity = action.payload.quantity
-          return action.payload; //Este es producto ya actualizo con la cantidad actualizada
+          return action.payload;
         }),
       };
 
@@ -78,16 +56,10 @@ export const cartReducer = (
         cart: state.cart.filter(
           (product) =>
             !(
-              product.size === action.payload.size &&
-              product._id == action.payload._id
+              product._id === action.payload._id &&
+              product.size === action.payload.size
             )
         ),
-      };
-    case "[Cart] - Update Address":
-    case "[Cart] - Load Address from cookies":
-      return {
-        ...state,
-        shippingAddress: action.payload,
       };
 
     case "[Cart] - Update order summary":
@@ -96,7 +68,14 @@ export const cartReducer = (
         ...action.payload,
       };
 
-    case "[Cart] - Order completed":
+    case "[Cart] - Update Address":
+    case "[Cart] - LoadAddress from Cookies":
+      return {
+        ...state,
+        shippingAddress: action.payload,
+      };
+
+    case "[Cart] - Order complete":
       return {
         ...state,
         cart: [],

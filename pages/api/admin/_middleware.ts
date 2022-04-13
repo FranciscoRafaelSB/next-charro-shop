@@ -4,7 +4,7 @@ import { getToken } from "next-auth/jwt";
 export async function middleware(req: NextRequest | any, ev: NextFetchEvent) {
   const session: any = await getToken({
     req,
-    secret: process.env.NEXT_AUTH_SECRET,
+    secret: process.env.NEXTAUTH_SECRET,
   });
   if (!session) {
     return new Response(JSON.stringify({ message: "No autorizado" }), {

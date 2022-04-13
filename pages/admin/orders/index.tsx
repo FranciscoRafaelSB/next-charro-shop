@@ -10,13 +10,7 @@ const columns: GridColDef[] = [
   { field: "id", headerName: "Orden ID", width: 250 },
   { field: "email", headerName: "Correo", width: 250 },
   { field: "name", headerName: "Nombre Completo", width: 300 },
-  {
-    field: "total",
-    headerName: "Monto total",
-    align: "center",
-    width: 300,
-    headerAlign: "center",
-  },
+  { field: "total", headerName: "Monto total", width: 300 },
   {
     field: "isPaid",
     headerName: "Pagada",
@@ -27,22 +21,16 @@ const columns: GridColDef[] = [
         <Chip variant="outlined" label="Pendiente" color="error" />
       );
     },
-    width: 150,
-    align: "center",
-    headerAlign: "center",
   },
   {
     field: "noProducts",
     headerName: "No.Productos",
     align: "center",
-    headerAlign: "center",
     width: 150,
   },
   {
     field: "check",
     headerName: "Ver orden",
-    headerAlign: "center",
-    align: "center",
     renderCell: ({ row }: GridValueGetterParams) => {
       return (
         <a href={`/admin/orders/${row.id}`} target="_blank" rel="noreferrer">
@@ -58,11 +46,13 @@ const OrdersPage = () => {
   const { data, error } = useSWR<IOrder[]>("/api/admin/orders");
 
   if (!data && !error) return <></>;
+  console.log(data);
 
   const rows = data!.map((order) => ({
     id: order._id,
-    email: (order.user as IUser).email,
-    name: (order.user as IUser).name,
+    email: (order.user as IUser)?.email,
+    // email: order.user.email,
+    name: (order.user as IUser)?.name,
     total: order.total,
     isPaid: order.isPaid,
     noProducts: order.numberOfItems,

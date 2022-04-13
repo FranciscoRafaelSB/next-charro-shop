@@ -117,7 +117,7 @@ export const SideMenu = () => {
             <ListItemIcon>
               <FemaleOutlined />
             </ListItemIcon>
-            <ListItemText primary={"Escaramusas"} />
+            <ListItemText primary={"Escaramuzas"} />
           </ListItem>
 
           <ListItem
@@ -131,7 +131,14 @@ export const SideMenu = () => {
             <ListItemText primary={"Charritos"} />
           </ListItem>
 
-          {!isLoggedIn && (
+          {isLoggedIn ? (
+            <ListItem button onClick={logout}>
+              <ListItemIcon>
+                <LoginOutlined />
+              </ListItemIcon>
+              <ListItemText primary={"Salir"} />
+            </ListItem>
+          ) : (
             <ListItem
               button
               onClick={() => navigateTo(`/auth/login?p=${router.asPath}`)}
@@ -142,22 +149,14 @@ export const SideMenu = () => {
               <ListItemText primary={"Ingresar"} />
             </ListItem>
           )}
-          {isLoggedIn && (
-            <ListItem button onClick={logout}>
-              <ListItemIcon>
-                <LoginOutlined />
-              </ListItemIcon>
-              <ListItemText primary={"Salir"} />
-            </ListItem>
-          )}
 
-          {isLoggedIn && user?.role === "admin" && (
+          {/* Admin */}
+          {user?.role === "admin" && (
             <>
-              {/* Admin */}
               <Divider />
               <ListSubheader>Admin Panel</ListSubheader>
 
-              <ListItem button onClick={() => navigateTo("/admin")}>
+              <ListItem button onClick={() => navigateTo("/admin/")}>
                 <ListItemIcon>
                   <DashboardOutlined />
                 </ListItemIcon>
@@ -170,7 +169,6 @@ export const SideMenu = () => {
                 </ListItemIcon>
                 <ListItemText primary={"Productos"} />
               </ListItem>
-
               <ListItem button onClick={() => navigateTo("/admin/orders")}>
                 <ListItemIcon>
                   <ConfirmationNumberOutlined />

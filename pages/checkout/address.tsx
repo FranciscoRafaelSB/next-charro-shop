@@ -1,7 +1,5 @@
-import { useRouter } from "next/router";
-import Cookies from "js-cookie";
 import { useContext, useEffect } from "react";
-
+import { useRouter } from "next/router";
 import {
   Box,
   Button,
@@ -13,18 +11,18 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import Cookies from "js-cookie";
 import { useForm } from "react-hook-form";
 
 import { ShopLayout } from "../../components/layouts";
 import { countries } from "../../utils";
-import { CartContex } from "../../context/cart/CartContext";
-
+import { CartContex } from "../../context";
 
 type FormData = {
   firstName: string;
   lastName: string;
   address: string;
-  address2: string;
+  address2?: string;
   zip: string;
   city: string;
   country: string;
@@ -46,7 +44,6 @@ const getAddressFromCookies = (): FormData => {
 
 const AddressPage = () => {
   const router = useRouter();
-
   const { updateAddress } = useContext(CartContex);
 
   const {
@@ -66,7 +63,6 @@ const AddressPage = () => {
       phone: "",
     },
   });
-  // console.log({ errors });
 
   useEffect(() => {
     reset(getAddressFromCookies());
@@ -76,17 +72,18 @@ const AddressPage = () => {
     updateAddress(data);
     router.push("/checkout/summary");
   };
+
   return (
     <ShopLayout
-      title={"Dirección"}
-      pageDescription={"Confirmar dirección de destino"}
+      title="Dirección"
+      pageDescription="Confirmar dirección del destino"
     >
       <form onSubmit={handleSubmit(onSubmitAddress)}>
-        <Typography variant="h1" component="h1" sx={{ mb: 2 }}>
+        <Typography variant="h1" component="h1">
           Dirección
         </Typography>
 
-        <Grid container spacing={2}>
+        <Grid container spacing={2} sx={{ mt: 2 }}>
           <Grid item xs={12} sm={6}>
             <TextField
               label="Nombre"
@@ -99,7 +96,6 @@ const AddressPage = () => {
               helperText={errors.firstName?.message}
             />
           </Grid>
-
           <Grid item xs={12} sm={6}>
             <TextField
               label="Apellido"
@@ -125,15 +121,12 @@ const AddressPage = () => {
               helperText={errors.address?.message}
             />
           </Grid>
-
           <Grid item xs={12} sm={6}>
             <TextField
               label="Dirección 2 (opcional)"
               variant="filled"
               fullWidth
               {...register("address2")}
-              error={!!errors.address2}
-              helperText={errors.address2?.message}
             />
           </Grid>
 
@@ -149,31 +142,6 @@ const AddressPage = () => {
               helperText={errors.zip?.message}
             />
           </Grid>
-
-          <Grid item xs={12} sm={6}>
-            <FormControl fullWidth>
-              {/* <InputLabel> País</InputLabel> */}
-              <TextField
-                select
-                variant="filled"
-                label="País"
-                defaultValue={Cookies.get("country") || "MEX"}
-                // value={"MEX"}
-                {...register("country", {
-                  required: "Este campo es requerido",
-                })}
-                error={!!errors.country}
-                // helperText={errors.country?.message}
-              >
-                {countries.map((country) => (
-                  <MenuItem key={country.code} value={country.code}>
-                    {country.name}
-                  </MenuItem>
-                ))}
-              </TextField>
-            </FormControl>
-          </Grid>
-
           <Grid item xs={12} sm={6}>
             <TextField
               label="Ciudad"
@@ -185,6 +153,32 @@ const AddressPage = () => {
               error={!!errors.city}
               helperText={errors.city?.message}
             />
+          </Grid>
+
+          <Grid item xs={12} sm={6}>
+            {/* <FormControl fullWidth> */}
+            <TextField
+              // select
+              variant="filled"
+              label="País"
+              fullWidth
+              // defaultValue={ Cookies.get('country') || countries[0].code }
+              {...register("country", {
+                required: "Este campo es requerido",
+              })}
+              error={!!errors.country}
+              helperText={errors.country?.message}
+            />
+            {/* {
+                                countries.map( country => (
+                                    <MenuItem 
+                                        key={ country.code }
+                                        value={ country.code }
+                                    >{ country.name }</MenuItem>
+                                ))
+                            }
+                        </TextField> */}
+            {/* </FormControl> */}
           </Grid>
           <Grid item xs={12} sm={6}>
             <TextField
@@ -207,7 +201,7 @@ const AddressPage = () => {
             className="circular-btn"
             size="large"
           >
-            Revisar Pedido
+            Revisar pedido
           </Button>
         </Box>
       </form>
@@ -217,33 +211,32 @@ const AddressPage = () => {
 
 // You should use getServerSideProps when:
 // - Only if you need to pre-render a page whose data must be fetched at request time
-// import { GetServerSideProps } from "next";
-
 // export const getServerSideProps: GetServerSideProps = async ({ req }) => {
-//   // const { data } = await  // your fetch function here
 
-//   const { token = "" } = req.cookies;
-//   let isValidToken = false;
+//     const { token = '' } = req.cookies;
+//     let isValidToken = false;
 
-//   try {
-//     await jwt.isValidToken(token);
-//     isValidToken = true;
-//   } catch (error) {
-//     isValidToken = false;
-//   }
+//     try {
+//         await jwt.isValidToken( token );
+//         isValidToken = true;
+//     } catch (error) {
+//         isValidToken = false;
+//     }
 
-//   if (!isValidToken) {
+//     if ( !isValidToken ) {
+//         return {
+//             redirect: {
+//                 destination: '/auth/login?p=/checkout/address',
+//                 permanent: false,
+//             }
+//         }
+//     }
+
 //     return {
-//       redirect: {
-//         destination: "/auth/login?p=/checkout/address",
-//         permanent: false,
-//       },
-//     };
-//   }
+//         props: {
 
-//   return {
-//     props: {},
-//   };
-// };
+//         }
+//     }
+// }
 
 export default AddressPage;

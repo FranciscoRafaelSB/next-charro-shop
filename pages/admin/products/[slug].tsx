@@ -1,18 +1,8 @@
-import {
-  ChangeEvent,
-  FC,
-  KeyboardEvent,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { ChangeEvent, FC, useEffect, useRef, useState } from "react";
 import { GetServerSideProps } from "next";
+import { useRouter } from "next/router";
+import { useForm } from "react-hook-form";
 
-import {
-  DriveFileRenameOutline,
-  SaveOutlined,
-  UploadOutlined,
-} from "@mui/icons-material";
 import {
   Box,
   Button,
@@ -34,14 +24,17 @@ import {
   RadioGroup,
   TextField,
 } from "@mui/material";
+import {
+  DriveFileRenameOutline,
+  SaveOutlined,
+  UploadOutlined,
+} from "@mui/icons-material";
 
-import { dbProducts } from "../../../database";
 import { AdminLayout } from "../../../components/layouts";
 import { IProduct } from "../../../interfaces";
-import { useForm } from "react-hook-form";
+import { dbProducts } from "../../../database";
 import { charroApi } from "../../../api";
 import { Product } from "../../../models";
-import { useRouter } from "next/router";
 
 const validTypes = ["botas", "vestidos", "camisa", "sombreros"];
 const validGender = ["charros", "escaramusas", "charritos", "unisex"];
@@ -68,7 +61,6 @@ interface Props {
 const ProductAdminPage: FC<Props> = ({ product }) => {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
-
   const [newTagValue, setNewTagValue] = useState("");
   const [isSaving, setIsSaving] = useState(false);
 
@@ -85,20 +77,17 @@ const ProductAdminPage: FC<Props> = ({ product }) => {
 
   useEffect(() => {
     const subscription = watch((value, { name, type }) => {
-      // console.log({ value, name, type });
-
       if (name === "title") {
         const newSlug =
           value.title
             ?.trim()
             .replaceAll(" ", "_")
             .replaceAll("'", "")
-            .toLowerCase() || "";
+            .toLocaleLowerCase() || "";
 
         setValue("slug", newSlug);
       }
     });
-
     return () => subscription.unsubscribe();
   }, [watch, setValue]);
 
@@ -116,26 +105,43 @@ const ProductAdminPage: FC<Props> = ({ product }) => {
   };
 
   const onNewTag = () => {
-    const newTag = newTagValue.trim().toLowerCase();
+    const newTag = newTagValue.trim().toLocaleLowerCase();
     setNewTagValue("");
     const currentTags = getValues("tags");
 
-    if (currentTags.includes(newTag)) return;
+    if (currentTags.includes(newTag)) {
+      return;
+    }
 
     currentTags.push(newTag);
-    // setValue("tags", [...currentTags, newTag], { shouldValidate: true });
   };
 
   const onDeleteTag = (tag: string) => {
-    const currentTags = getValues("tags");
+    const updatedTags = getValues("tags").filter((t) => t !== tag);
+    setValue("tags", updatedTags, { shouldValidate: true });
+  };
 
-    setValue(
-      "tags",
-      currentTags.filter((t) => t !== tag),
-      { shouldValidate: true }
-    );
+  const onFilesSelected = async ({ target }: ChangeEvent<HTMLInputElement>) => {
+    if (!target.files || target.files.length === 0) {
+      return;
+    }
 
-    // setValue("tags", [...currentTags], { shouldValidate: true });
+    try {
+      // console.log( file );
+      for (const file of target.files) {
+        const formData = new FormData();
+        formData.append("file", file);
+        const { data } = await charroApi.post<{ message: string }>(
+          "/admin/upload",
+          formData
+        );
+        setValue("images", [...getValues("images"), data.message], {
+          shouldValidate: true,
+        });
+      }
+    } catch (error) {
+      console.log({ error });
+    }
   };
 
   const onDeleteImage = (image: string) => {
@@ -146,22 +152,20 @@ const ProductAdminPage: FC<Props> = ({ product }) => {
     );
   };
 
-  const onSubmitForm = async (formData: FormData) => {
-    if (formData.images.length < 2) return alert("Mínimo 2 imagenes");
+  const onSubmit = async (form: FormData) => {
+    if (form.images.length < 2) return alert("Mínimo 2 imagenes");
     setIsSaving(true);
 
     try {
       const { data } = await charroApi({
         url: "/admin/products",
-        method: formData._id ? "PUT" : "POST", // si tenemos un _id, entonces actualizar, sino crear
-        data: formData,
+        method: form._id ? "PUT" : "POST", // si tenemos un _id, entonces actualizar, si no crear
+        data: form,
       });
 
       console.log({ data });
-
-      if (!formData._id) {
-        //TODO recargar el navegador
-        router.replace(`/admin/products/${formData.slug}`);
+      if (!form._id) {
+        router.replace(`/admin/products/${form.slug}`);
       } else {
         setIsSaving(false);
       }
@@ -169,29 +173,6 @@ const ProductAdminPage: FC<Props> = ({ product }) => {
       console.log(error);
       setIsSaving(false);
     }
-    setIsSaving(false);
-
-    // console.log({ formData });
-  };
-
-  const onFilesSelected = async ({ target }: ChangeEvent<HTMLInputElement>) => {
-    if (!target.files || target.files?.length === 0) return;
-
-    try {
-      // console.log(file);
-      for (const file of target.files) {
-        const formData = new FormData();
-        formData.append("file", file); //aniadir el file
-        const { data } = await charroApi.post<{ message: string }>(
-          "/admin/upload",
-          formData
-        );
-        console.log(data.message);
-        setValue("images", [...getValues("images"), data.message], {
-          shouldValidate: true,
-        });
-      }
-    } catch (error) {}
   };
 
   return (
@@ -200,7 +181,7 @@ const ProductAdminPage: FC<Props> = ({ product }) => {
       subtitle={`Editando: ${product.title}`}
       icon={<DriveFileRenameOutline />}
     >
-      <form onSubmit={handleSubmit(onSubmitForm)}>
+      <form onSubmit={handleSubmit(onSubmit)}>
         <Box display="flex" justifyContent="end" sx={{ mb: 1 }}>
           <Button
             color="secondary"
@@ -215,7 +196,6 @@ const ProductAdminPage: FC<Props> = ({ product }) => {
 
         <Grid container spacing={2}>
           {/* Data */}
-
           <Grid item xs={12} sm={6}>
             <TextField
               label="Título"
@@ -238,7 +218,6 @@ const ProductAdminPage: FC<Props> = ({ product }) => {
               sx={{ mb: 1 }}
               {...register("description", {
                 required: "Este campo es requerido",
-                minLength: { value: 2, message: "Mínimo 2 caracteres" },
               })}
               error={!!errors.description}
               helperText={errors.description?.message}
@@ -252,7 +231,7 @@ const ProductAdminPage: FC<Props> = ({ product }) => {
               sx={{ mb: 1 }}
               {...register("inStock", {
                 required: "Este campo es requerido",
-                minLength: { value: 0, message: "Mínimo de valor cero" },
+                min: { value: 0, message: "Mínimo de valor cero" },
               })}
               error={!!errors.inStock}
               helperText={errors.inStock?.message}
@@ -266,7 +245,7 @@ const ProductAdminPage: FC<Props> = ({ product }) => {
               sx={{ mb: 1 }}
               {...register("price", {
                 required: "Este campo es requerido",
-                minLength: { value: 0, message: "Mínimo de valor cero" },
+                min: { value: 0, message: "Mínimo de valor cero" },
               })}
               error={!!errors.price}
               helperText={errors.price?.message}
@@ -298,10 +277,9 @@ const ProductAdminPage: FC<Props> = ({ product }) => {
               <FormLabel>Género</FormLabel>
               <RadioGroup
                 row
-                // {...register("gender")}
                 value={getValues("gender")}
-                onChange={(e) =>
-                  setValue("gender", e.target.value, { shouldValidate: true })
+                onChange={({ target }) =>
+                  setValue("gender", target.value, { shouldValidate: true })
                 }
               >
                 {validGender.map((option) => (
@@ -343,7 +321,6 @@ const ProductAdminPage: FC<Props> = ({ product }) => {
                   val.trim().includes(" ")
                     ? "No puede tener espacios en blanco"
                     : undefined,
-                // minLength: { value: 2, message: 'Mínimo 2 caracteres' }
               })}
               error={!!errors.slug}
               helperText={errors.slug?.message}
@@ -403,7 +380,7 @@ const ProductAdminPage: FC<Props> = ({ product }) => {
                 ref={fileInputRef}
                 type="file"
                 multiple
-                accept="image/png image/gif image/jpeg image/jpg"
+                accept="image/png, image/gif, image/jpeg"
                 style={{ display: "none" }}
                 onChange={onFilesSelected}
               />
@@ -417,9 +394,9 @@ const ProductAdminPage: FC<Props> = ({ product }) => {
                 }}
               />
 
-              <Grid container spacing={2} sx={{ mt: 1 }}>
-                {getValues("images").map((img, i) => (
-                  <Grid item xs={4} sm={4} key={i}>
+              <Grid container spacing={2}>
+                {getValues("images").map((img) => (
+                  <Grid item xs={4} sm={3} key={img}>
                     <Card>
                       <CardMedia
                         component="img"
@@ -457,16 +434,14 @@ export const getServerSideProps: GetServerSideProps = async ({ query }) => {
   let product: IProduct | null;
 
   if (slug === "new") {
-    //crear un producto
+    // crear un producto
     const tempProduct = JSON.parse(JSON.stringify(new Product()));
     delete tempProduct._id;
-    tempProduct.images = ["img1.jpg", "img2.jpg"];
+    // tempProduct.images = ["img1.jpg", "img2.jpg"];
     product = tempProduct;
   } else {
     product = await dbProducts.getProductBySlug(slug.toString());
   }
-
-  // const product = await dbProducts.getProductBySlug(slug.toString());
 
   if (!product) {
     return {

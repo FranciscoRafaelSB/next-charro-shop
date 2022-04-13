@@ -1,10 +1,10 @@
 import NextAuth from "next-auth";
 import GithubProvider from "next-auth/providers/github";
 import Credentials from "next-auth/providers/credentials";
-import GoogleProvider from "next-auth/providers/google";
+
+import { TypeORMLegacyAdapter } from "@next-auth/typeorm-legacy-adapter";
 
 import { dbUsers } from "../../../database";
-import jwt from "jsonwebtoken";
 
 export default NextAuth({
   // Configure one or more authentication providers
@@ -40,11 +40,6 @@ export default NextAuth({
       clientId: process.env.GITHUB_ID,
       clientSecret: process.env.GITHUB_SECRET,
     }),
-
-    GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-    }),
   ],
 
   // Custom Pages
@@ -56,16 +51,20 @@ export default NextAuth({
   // Callbacks
   jwt: {
     secret: process.env.JWT_SECRET_SEED, // deprecated
-    maxAge: 8 * 60 * 60,
   },
 
   session: {
-    //  maxAge: 2592000, /// 30d
-    maxAge: 8 * 60 * 60, //8 hours
-    // jwt: true,
+    maxAge: 2592000, /// 30d
     strategy: "jwt",
     updateAge: 86400, // cada día
   },
+
+  // adapter: TypeORMLegacyAdapter({
+  //   // type: 'sqlite',  // or mysql, postgresql, mssql
+  //   // database: ':memory:',
+  //   type: 'mongodb'
+  //   synchronize: false
+  // }),
 
   callbacks: {
     async jwt({ token, account, user }) {
@@ -101,3 +100,5 @@ export default NextAuth({
     },
   },
 });
+
+

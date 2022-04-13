@@ -3,23 +3,24 @@ import { getToken } from "next-auth/jwt";
 // import { jwt } from "../../utils";
 
 export async function middleware(req: NextRequest | any, ev: NextFetchEvent) {
-  const session = await getToken({ req, secret: process.env.NEXT_AUTH_SECRET });
+  const session = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
   console.log({ session });
+
   if (!session) {
     //Solution 1
-    const url = req.nextUrl.clone();
-    url.pathname = "/auth/login";
-    url.search = `p=${req.page.name}`;
-    return NextResponse.redirect(url);
+    // const url = req.nextUrl.clone();
+    // url.pathname = "/auth/login";
+    // url.search = `p=${req.page.name}`;
+    // return NextResponse.redirect(url);
 
     //solution 2
-    // console.log(req.nextUrl.clone());
-    // const { origin, pathname } = req.nextUrl.clone();
+    console.log(req.nextUrl.clone());
+    const { origin, pathname } = req.nextUrl.clone();
 
-    // return NextResponse.redirect(`${origin}/auth/login?p=${pathname}`);
+    return NextResponse.redirect(`${origin}/auth/login?p=${pathname}`);
 
-    //   const requestedPage = req.page.name;
-    //   return NextResponse.redirect(`/auth/login?p=${requestedPage}`);
+    // const requestedPage = req.page.name;
+    // return NextResponse.redirect(`/auth/login?p=${requestedPage}`);
   }
   return NextResponse.next();
   // const { token = "" } = req.cookies;

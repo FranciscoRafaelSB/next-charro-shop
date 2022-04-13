@@ -39,12 +39,12 @@ export const CartProvider: FC = ({ children }) => {
         ? JSON.parse(Cookie.get("cart")!)
         : [];
       dispatch({
-        type: "[Cart] - Load cart from cookies | storage",
+        type: "[Cart] - LoadCart from cookies | storage",
         payload: cookieProducts,
       });
     } catch (error) {
       dispatch({
-        type: "[Cart] - Load cart from cookies | storage",
+        type: '[Cart] - LoadCart from cookies | storage',
         payload: [],
       });
     }
@@ -62,7 +62,7 @@ export const CartProvider: FC = ({ children }) => {
       country: Cookie.get("country") || "",
       phone: Cookie.get("phone") || "",
     };
-    dispatch({ type: "[Cart] - Load Address from cookies", payload: ship });
+    dispatch({ type: "[Cart] - LoadAddress from Cookies", payload: ship });
     // }
   }, []);
 
@@ -136,7 +136,7 @@ export const CartProvider: FC = ({ children }) => {
   };
 
   const updateCartQuantity = (product: ICartProduct) => {
-    dispatch({ type: "[Cart] -Chance product quantity", payload: product });
+    dispatch({ type: "[Cart] - Change cart quantity", payload: product });
   };
 
   const removeCartProduct = (product: ICartProduct) => {
@@ -182,7 +182,7 @@ export const CartProvider: FC = ({ children }) => {
       const { data } = await charroApi.post<IOrder>("/orders", body);
 
       //TODO Dispatch
-      dispatch({ type: "[Cart] - Order completed" });
+      dispatch({ type: "[Cart] - Order complete" });
 
       return {
         hasError: false,
