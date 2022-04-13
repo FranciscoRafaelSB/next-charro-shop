@@ -18,8 +18,8 @@ export async function middleware(req: NextRequest | any, ev: NextFetchEvent) {
 
     // return NextResponse.redirect(`${origin}/auth/login?p=${pathname}`);
 
-    // const requestedPage = req.page.name;
-    // return NextResponse.redirect(`/auth/login?p=${requestedPage}`);
+    //   const requestedPage = req.page.name;
+    //   return NextResponse.redirect(`/auth/login?p=${requestedPage}`);
   }
   return NextResponse.next();
   // const { token = "" } = req.cookies;
